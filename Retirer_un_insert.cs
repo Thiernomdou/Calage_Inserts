@@ -43,8 +43,6 @@ namespace Calage_Inserts
                 string strRequete = "DELETE FROM [ACI].[dbo].[Inserts] WHERE Numero = '" + textBox1.Text + "'";
                 SqlCommand myCommand = new SqlCommand(strRequete, myConnection);
                 SqlDataReader mySqDataReader = myCommand.ExecuteReader();
-                //
-                textBox1.Text.Trim();
 
                 if (textBox1.Text == "")
                 {

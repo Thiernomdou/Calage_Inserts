@@ -23,8 +23,9 @@ namespace Calage_Inserts
 {
     public partial class Extraction_Jobs : Form
     {
- 
 
+        string connString = @"Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fra2exa01-sxdir1-vip.europe.essilor.group)(PORT=1561)))
+                             (CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=PUE1)));User Id=combo;Password=combo;";
         public Extraction_Jobs()
         {
             InitializeComponent();
@@ -42,8 +43,7 @@ namespace Calage_Inserts
         {
             // création d'entrées TNS  
             
-            string connString = @"Data Source=(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=fra2exa01-sxdir1-vip.europe.essilor.group)(PORT=1561)))
-                             (CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=PUE1)));User Id=combo;Password=combo;";
+            
 
             /*
                         PUE1.WORLD =
@@ -57,17 +57,15 @@ namespace Calage_Inserts
             try
             {
                 conn.Open();
-                Console.WriteLine("Connecté à Oracle");
                 OracleCommand cmd = new OracleCommand();
                 cmd.Connection = conn;
-                cmd.CommandText = "Select JOB_NB FROM COMBO.COMBO_JOB_LINES group by JOB_NB";
+                cmd.CommandText = "Select * FROM COMBO.COMBO_JOB_LINES";
                 OracleDataReader reader = cmd.ExecuteReader();
 
                 dataGridView1.Rows.Clear();
-                DataSet dataset = new DataSet();
                 while (reader.Read())
                 {
-                    dataGridView1.Rows.Add(reader[0]);
+                    dataGridView1.Rows.Add(reader[1], reader[2], reader[3], reader[4], reader[5], reader[6], reader[7], reader[8], reader[9]);
                 }
 
             }
@@ -98,20 +96,49 @@ namespace Calage_Inserts
         private void button3_Click(object sender, EventArgs e)
         {
 
-            
-            
-            ;
+            var shots_nb = 0;
+            var cd_press = "";
+            var cd_mold = "";
+            var routing_name = "";
 
-            object missValue = System.Reflection.Missing.Value;
+            OracleConnection conn = new OracleConnection(connString); ;
+            conn.Open();
+            OracleCommand cmd = new OracleCommand();
+            cmd.Connection = conn;
+            cmd.CommandText = "SELECT distinct (SHOTS_NB), CD_PRESS, CD_MOLD, ROUTING_NAME FROM COMBO_JOB_HEADER_TRACKING where JOB_NB = " + dataGridView1.CurrentRow.Cells["JOB_NB"].Value;
+            OracleDataReader reader = cmd.ExecuteReader();
+            while (reader.Read() == true)
+            {
+                shots_nb = reader.GetInt32(0);
+                cd_press = reader.GetString(1);
+                cd_mold = reader.GetString(2);
+                routing_name = reader.GetString(3);
+            }
 
-            Excel._Application xlsp = new Excel.Application();
+            conn.Close();
 
-            Excel.Workbook xlworkbook = xlsp.Workbooks.Add(missValue);
-            Excel.Worksheet xlworkSheet = (Excel.Worksheet)xlworkbook.ActiveSheet;
-            xlworkSheet.get_Range("A1", "I30").Borders.Weight = Excel.XlBorderWeight.xlThin;
+
+
+
+
+            object misValue = System.Reflection.Missing.Value;
+
+            Excel._Application xlsp = new Microsoft.Office.Interop.Excel.Application();
+
+            if(xlsp == null)
+            {
+                MessageBox.Show("Excel n'est pas corectement installé");
+            }
+
+            Excel.Workbook xlworkbook = xlsp.Workbooks.Add(misValue);
+            //Enregistrer les données dans la feuille 1
+            Excel.Worksheet xlworkSheet = (Excel.Worksheet)xlworkbook.Worksheets.get_Item(1);
+            xlworkSheet.get_Range("A1", "I30").Borders.Weight = Excel.XlBorderWeight.xlThin;           
 
             xlworkSheet.Cells[1, 1] = "Date";
+            xlworkSheet.Cells[1, 2] = DateTime.Now.ToString("yyyy/MM/dd");
             xlworkSheet.Cells[1, 5] = "Semaine";
+            xlworkSheet.Cells[1, 6] = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
             xlworkSheet.Cells[1, 7] = "Validation préparation";
             xlworkSheet.get_Range("A1", "I1").Font.Size = 10;
             xlworkSheet.get_Range("B1", "D1").Merge(false);
@@ -124,17 +151,22 @@ namespace Calage_Inserts
 
             xlworkSheet.get_Range("A4:A30", "I4:I30").Font.Bold = 5;
             xlworkSheet.Cells[4, 1] = "Job";
+            xlworkSheet.Cells[4, 5] = cd_mold;
+            xlworkSheet.Cells[4, 2] = dataGridView1.CurrentRow.Cells["JOB_NB"].Value;
             xlworkSheet.get_Range("B4", "C4").Merge(false);
             xlworkSheet.Cells[4, 4] = "Moule";
             xlworkSheet.get_Range("E4", "F4").Merge(false);
             xlworkSheet.Cells[4, 7] = "Presse";
+            xlworkSheet.Cells[4, 8] = cd_press;
             xlworkSheet.get_Range("H4", "I4").Merge(false);
 
             xlworkSheet.get_Range("A5", "I5").Merge(false);
 
             xlworkSheet.Cells[6, 1] = "Produit";
+            xlworkSheet.Cells[6, 2] = routing_name;
             xlworkSheet.get_Range("B6", "E6").Merge(false);
             xlworkSheet.Cells[6, 6] = "Num Shot";
+            xlworkSheet.Cells[6, 7] = shots_nb;
             xlworkSheet.get_Range("G6", "I6").Merge(false);
 
             xlworkSheet.get_Range("A7", "I7").Merge(false);
@@ -186,167 +218,55 @@ namespace Calage_Inserts
             xlworkSheet.Cells[26, 3] = "01";
             xlworkSheet.Cells[26, 4] = "02";
             xlworkSheet.Cells[26, 5] = "03";
+            xlworkSheet.get_Range("A29", "B29").Merge(false);
             xlworkSheet.Cells[26, 6] = "04";
             xlworkSheet.Cells[26, 7] = "06";
             xlworkSheet.Cells[26, 8] = "07";
             xlworkSheet.Cells[26, 9] = "08";
+            xlworkSheet.get_Range("A27", "B27").Merge(false);
+            xlworkSheet.get_Range("A28", "B28").Merge(false);
+            xlworkSheet.get_Range("A29", "B29").Merge(false);
+            xlworkSheet.get_Range("A30", "B30").Merge(false);
 
+            string destination = @"R:\COMMUN\ACI\Data\Jobs_Combo\Job_" + dataGridView1.CurrentRow.Cells["JOB_NB"].Value;
 
-            //xlworkSheet.get_Range("A4:A6", "I4:I6").Borders.Weight = Excel.XlBorderWeight.xlThin;
-
-            xlworkbook.SaveAs(@"R:\Commun\ACI\Data\Jobs_Combo\job_" + dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value, Excel.XlSaveAction.xlSaveChanges, missValue, missValue, missValue, missValue, Excel.XlSaveAsAccessMode.xlExclusive, missValue, missValue, missValue, missValue, missValue);
-            xlworkbook.Close(true, missValue, missValue);
-            xlsp.Quit();
-
-
-
-            /*
-            string fileName = "Job.xlsx";
-            string sourcePath = @"R:\COMMUN\ACI\Jobs\temple";
-            string targetPath = @"R:\COMMUN\ACI\Data\Jobs_Combo";
-
-            string sourceFile = System.IO.Path.Combine(sourcePath, fileName);
-            string destFile = System.IO.Path.Combine(targetPath, fileName);
-
-            //System.IO.Directory.CreateDirectory(targetPath);
-
-            if(!File.Exists(destFile))
+            if (!File.Exists(destination))
             {
-                System.IO.File.Copy(sourceFile, destFile);
-              
-                MessageBox.Show("Vous avez extrait le fichier " + dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value + "_Job" + " dans " + "R:\\COMMUN\\ACI\\Data\\Jobs_Combo");
-
-                var excelApp = new Excel.Application();
-
-                excelApp.Visible = true;
-
-                Excel._Worksheet workBooks = (Excel.Worksheet)excelApp.ActiveSheet;
-
-                //Ouverture du fichier Excel, à vous de choisir l'emplacement ou est situé le fichier excel ainsi que son nom!!
-
-                Microsoft.Office.Interop.Excel._Workbook workbook = excelApp.Workbooks.Open(@"R:\COMMUN\ACI\Data\Jobs_Combo\Job.xlsx");
-
-                workBooks = workbook.Sheets["Feuil1"]; // On sélectionne la Feuil1
-
-                workBooks = workbook.ActiveSheet;
-
-                //workBooks.Name = "Electronique71.com"; // on renomme la Feuil1 
-
-                //dataGridView1.RowHeadersVisible = false;
-
-                
-                    workBooks.Cells[2, 4] = dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value;
-                
+                xlworkbook.SaveAs(destination, Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive, misValue, misValue);
+                MessageBox.Show("Vous avez extrait le Job" + dataGridView1.CurrentRow.Cells["JOB_NB"].Value + " dans " + "R:\\COMMUN\\ACI\\Data\\Jobs_Combo");
+                xlworkbook.Close(true, misValue, misValue);
+                xlsp.Quit();
             }
             else
             {
-                MessageBox.Show("Le fichier " +  dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value + "_Job " + " existe déjà");
-            }
-
-
-            */
-
-
-            //manipulation file et directory
-            /*
-            string sourceFile = System.IO.Path.Combine(@"R:\COMMUN\ACI\Jobs\temple\Job.xlsx");
-            string destFile =   System.IO.Path.Combine(@"R:\COMMUN\ACI\Data\Jobs_Combo\Job" + dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value);
-            
-
-            try
-            {
-                
-
-                // Ensure that the target does not exist.
-                if (!File.Exists(destFile))
-                {
-                    System.IO.File.Copy(sourceFile, destFile, true);
-                    MessageBox.Show("Vous avez extrait le fichier " + " Job" + dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value  + " dans " + "R:\\COMMUN\\ACI\\Data\\Jobs_Combo");
-
-                    //File.Delete(destFile);
-                    // Move the file.
-                                     
-                    object missValue = System.Reflection.Missing.Value;
-
-                    Excel.Application appExcel = new Excel.Application();
-                    Excel.Workbook xlworkbook = appExcel.Workbooks.Add(missValue);
-                    Excel.Worksheet xlworkSheet = (Excel.Worksheet)xlworkbook.Worksheets.get_Item(1);
-
-                    xlworkSheet.Cells[4, 2] = dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value;
-                    
-                    //xlworkbook.SaveAs(destFile,Excel.XlSaveAction.xlSaveChanges, missValue, missValue, missValue, missValue, Excel.XlSaveAsAccessMode.xlNoChange, missValue, missValue, missValue, missValue, missValue);
-                    
-
-                    //Fermeture d'Excel
-                    //xlworkbook.Close(true, missValue, missValue);
-                    
-                }
-                else
-                {
-                    MessageBox.Show("Le fichier " + " Job" + dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value + " existe déjà");
-                }
-
-
+                MessageBox.Show("Le Job" + dataGridView1.CurrentRow.Cells["JOB_NB"].Value + " existe déjà");
 
             }
-            catch (Exception es)
-            {
-                Console.WriteLine("Erreur", es.ToString());
-            }
-            
-            */
 
-            //System.IO.File.Move(sourceFile, destFile);
-
-            //Extraction des données de la DatagridView vers Excel
-            /*
-            Excel._Application xlsp;
-            Excel.Workbook xlworkbook;
-            Excel.Worksheet xlworkSheet;
-
-            object missValue = System.Reflection.Missing.Value;
-
-            xlsp = new Excel.Application();
-
-            xlworkbook = xlsp.Workbooks.Add(missValue);
-            xlworkSheet = (Excel.Worksheet)xlworkbook.Worksheets.get_Item(1);
-            xlworkSheet.Cells[1, 1] = dataGridView1.CurrentRow.Cells["ORGANIZATION_ID"].Value;
-
-
-            xlworkbook.SaveAs(@"R:\Commun\ACI\Data\Jobs_Combo\", Excel.XlSaveAction.xlSaveChanges, missValue, missValue, missValue, missValue, Excel.XlSaveAsAccessMode.xlNoChange, missValue, missValue, missValue, missValue, missValue);
-            
-           xlworkbook.Close(true, missValue, missValue);
-            */
-            // xlsp.Quit();
-
-            /*
-            releaseObject(xlworkSheet);
-            releaseObject(xlworkbook);
-            releaseObject(xlsp);
-            */
         }
 
-        /*
-        private void releaseObject(object obj)
+        private void button4_Click(object sender, EventArgs e)
         {
-            
+            string searchValue = textBox1.Text;
+
+            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             try
             {
-                //System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
-                //obj = null;
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    if (row.Cells[0].Value.ToString().Equals(searchValue))
+                    {
+                        row.Selected = true;
+                        break;
+                    }
+                    
+                }
+                MessageBox.Show("Ce Job n'existe pas dans la liste");
             }
-            catch (Exception e)
+            catch (Exception exc)
             {
-                obj = null;
-                MessageBox.Show("Exception occured while releasing object " + e.ToString());
+                MessageBox.Show(exc.Message);
             }
-            finally
-            {
-                GC.Collect();
-            }
-            
         }
-
-        */
     }
 }

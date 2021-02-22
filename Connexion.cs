@@ -7,9 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SQLite;
-using System.IO;
-using Cake.Core.IO;
+using System.Data.SqlClient;
 
 namespace Calage_Inserts
 {
@@ -49,54 +47,77 @@ namespace Calage_Inserts
 
         private void button2_Click_1(object sender, EventArgs e)
         {
-            //conditions de remplissage du champ login
-            if (textBox2.Text.Trim() == "" && textBox1.Text.Trim() == "")
+            //Connexion utilisateurs
+            string myConnectionString = @"user id=sa; password=K@rdexlsadm21!; data source=FRESD32615\SQLEXPRESS";
+            SqlConnection myConnection = new SqlConnection(myConnectionString);
+           
+            try
             {
-                MessageBox.Show("Veuillez renseigner le champ login et password");
-                textBox2.BackColor = Color.Red;
-                textBox1.BackColor = Color.Red;
-                return;
-            }
-            else
-            {
-                string query = "SELECT * FROM Connexion WHERE Login = @user AND Password = @pass";
-                SQLiteConnection conn = new SQLiteConnection("Data Source=inserts.db;");
-                conn.Open();
-                SQLiteCommand cmd = new SQLiteCommand(query, conn);
-                cmd.Parameters.AddWithValue("@user", textBox1.Text);
-                cmd.Parameters.AddWithValue("@pass", textBox2.Text);
-                SQLiteDataAdapter da = new SQLiteDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-
-
-                if (dt.Rows.Count > 0)
+                //conditions de remplissage du champ login
+                if (textBox2.Text.Trim() == "" && textBox1.Text.Trim() == "")
                 {
-                    this.Hide();
-                    if(dt.Rows[0][0].ToString() == "1")
-                    {
-                        Accueil a = new Accueil(dt.Rows[0][1].ToString());
-                        a.Show();
-                    }
-                    else if(dt.Rows[0][0].ToString() == "2")
-                    {
-                        Accueil1 a = new Accueil1(dt.Rows[0][1].ToString());
-                        a.Show();
-                    }
-                    else if (dt.Rows[0][0].ToString() == "3")
-                    {
-                        Accueil2 a = new Accueil2(dt.Rows[0][1].ToString());
-                        a.Show();
-                    }
+                    MessageBox.Show("Veuillez renseigner le champ login et password");
+                    textBox2.BackColor = Color.Red;
+                    textBox1.BackColor = Color.Red;
+                    return;
                 }
                 else
                 {
-                    MessageBox.Show("Login ou Password incorrect");
-                    textBox1.BackColor = Color.Red;
-                    textBox2.BackColor = Color.Red;
-                    return;
+                    myConnection.Open();
+                    string strRequete = "SELECT * FROM [ACI].[dbo].[User_ACI] WHERE [Login_User_ACI] = @user AND [Mdp] = @pass";
+                    SqlCommand myCommand = new SqlCommand(strRequete, myConnection);
+                    SqlDataAdapter da = new SqlDataAdapter(myCommand);
+
+                    
+                    myCommand.Parameters.AddWithValue("@user", textBox1.Text);
+                    myCommand.Parameters.AddWithValue("@pass", textBox2.Text);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+
+                    if (dt.Rows.Count > 0)
+                    {
+                        this.Hide();
+                        if (dt.Rows[0][0].ToString() == "1")
+                        {
+                            Accueil a = new Accueil(dt.Rows[0][1].ToString());
+                            a.Show();
+                        }
+                        else if (dt.Rows[0][0].ToString() == "2")
+                        {
+                            Accueil1 a = new Accueil1(dt.Rows[0][1].ToString());
+                            a.Show();
+                        }
+                        else if (dt.Rows[0][0].ToString() == "3")
+                        {
+                            Accueil2 a = new Accueil2(dt.Rows[0][1].ToString());
+                            a.Show();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Login ou Password incorrect");
+                        textBox1.BackColor = Color.Red;
+                        textBox2.BackColor = Color.Red;
+                        return;
+                    }
                 }
+
+                
             }
+            catch (Exception eMsg1)
+            {
+                Console.WriteLine("Erreur durant l’execution de la requete : " + eMsg1.Message);
+            }
+            finally
+            {
+                myConnection.Close();
+            }
+
+
+
+            
+            
         }
 
         private void button3_Click(object sender, EventArgs e)

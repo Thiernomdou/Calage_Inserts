@@ -45,7 +45,6 @@ C:\Users\thiernd\Documents\Calage_Inserts\Calage_Inserts\bin\Debug\System.Memory
 C:\Users\thiernd\Documents\Calage_Inserts\Calage_Inserts\bin\Debug\System.Numerics.Vectors.xml
 C:\Users\thiernd\Documents\Calage_Inserts\Calage_Inserts\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
 R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\obj\Debug\Calage_Inserts.csprojAssemblyReference.cache
-R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\obj\Debug\Calage_Inserts.csproj.ResolveComReference.cache
 R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\obj\Debug\Calage_Inserts.Ajouter_un_insert.resources
 R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\obj\Debug\Calage_Inserts.Extraction_Jobs.resources
 R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\obj\Debug\Calage_Inserts.Remplir_Feuille_Calage.resources
@@ -139,3 +138,8 @@ C:\Users\lenzia\Desktop\aci\Calage_Inserts-master\Calage_Inserts\obj\Debug\Calag
 C:\Users\lenzia\Desktop\aci\Calage_Inserts-master\Calage_Inserts\obj\Debug\Calage_Inserts.exe
 C:\Users\lenzia\Desktop\aci\Calage_Inserts-master\Calage_Inserts\obj\Debug\Calage_Inserts.pdb
 C:\Users\lenzia\Desktop\aci\Calage_Inserts-master\Calage_Inserts\bin\Debug\Oracle.DataAccess.dll
+R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\bin\Debug\Oracle.ManagedDataAccess.dll
+R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\bin\Debug\System.Data.SqlClient.dll
+R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\bin\Debug\Spire.License.xml
+R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\bin\Debug\System.Data.SqlClient.xml
+R:\Commun\ACI\Autre\Calage_Inserts\Calage_Inserts\obj\Debug\Calage_Inserts.Stock.resources
